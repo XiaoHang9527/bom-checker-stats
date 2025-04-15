@@ -78,8 +78,7 @@
                     fetch(countApiUrl)
                         .then(response => {
                             if (response.ok) {
-                                // 不使用外部API，只显示统计信息
-                                document.getElementById('status').textContent = '已记录访问信息';
+                                document.getElementById('status').textContent = '统计数据已记录';
                                 document.getElementById('status').className = 'success';
                             } else {
                                 throw new Error(`HTTP错误: ${response.status}`);
