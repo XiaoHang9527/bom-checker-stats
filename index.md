@@ -39,7 +39,7 @@
             return {
                 deviceId: urlParams.get('id') || 'unknown',
                 version: urlParams.get('v') || 'unknown',
-                timestamp: new Date().toISOString()
+                timestamp: urlParams.get('t') || new Date().toISOString() // 使用传入的时间戳或当前时间
             };
         }
 
