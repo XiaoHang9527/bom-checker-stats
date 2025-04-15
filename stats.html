@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BOM Checker Usage Statistics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1, h2 {
+            color: #4a86e8;
+        }
+        .stats-section {
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script>
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch('stats/usage_stats.json');
+                const stats = await response.json();
+                
+                // 显示版本统计
+                const versionsTable = document.getElementById('versions-table');
+                let versionsHtml = '<tr><th>版本</th><th>使用次数</th><th>最后使用时间</th></tr>';
+                
+                for (const [version, data] of Object.entries(stats.versions)) {
+                    versionsHtml += `
+                        <tr>
+                            <td>v${version}</td>
+                            <td>${data.count}</td>
+                            <td>${new Date(data.last_seen).toLocaleString()}</td>
+                        </tr>
+                    `;
+                }
+                
+                versionsTable.innerHTML = versionsHtml;
+                
+                // 显示设备统计
+                const devicesTable = document.getElementById('devices-table');
+                let devicesHtml = '<tr><th>设备ID</th><th>首次使用时间</th><th>使用的版本</th></tr>';
+                
+                for (const [deviceId, data] of Object.entries(stats.devices)) {
+                    devicesHtml += `
+                        <tr>
+                            <td>${deviceId}</td>
+                            <td>${new Date(data.first_seen).toLocaleString()}</td>
+                            <td>${data.versions.map(v => 'v' + v).join(', ')}</td>
+                        </tr>
+                    `;
+                }
+                
+                devicesTable.innerHTML = devicesHtml;
+                
+                // 显示总计
+                document.getElementById('total-versions').textContent = Object.keys(stats.versions).length;
+                document.getElementById('total-devices').textContent = Object.keys(stats.devices).length;
+                
+                // 计算总使用次数
+                let totalUsage = 0;
+                for (const data of Object.values(stats.versions)) {
+                    totalUsage += data.count;
+                }
+                document.getElementById('total-usage').textContent = totalUsage;
+                
+            } catch (error) {
+                console.error('加载统计数据时出错:', error);
+                document.getElementById('error-message').textContent = '加载统计数据失败';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        }
+
+        // 页面加载完成后执行
+        window.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>BOM Checker 使用统计</h1>
+        
+        <div id="error-message" style="display: none; color: red; padding: 10px; background-color: #ffeeee; border-radius: 5px; margin-bottom: 20px;"></div>
+        
+        <div class="stats-section">
+            <h2>总体统计</h2>
+            <p>总版本数: <strong id="total-versions">-</strong></p>
+            <p>总设备数: <strong id="total-devices">-</strong></p>
+            <p>总使用次数: <strong id="total-usage">-</strong></p>
+        </div>
+        
+        <div class="stats-section">
+            <h2>版本统计</h2>
+            <table id="versions-table">
+                <tr><th>加载中...</th></tr>
+            </table>
+        </div>
+        
+        <div class="stats-section">
+            <h2>设备统计</h2>
+            <table id="devices-table">
+                <tr><th>加载中...</th></tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
