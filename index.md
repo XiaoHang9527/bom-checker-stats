@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>BOM Checker 使用统计</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,53 +33,107 @@
             padding: 10px;
             border-radius: 4px;
         }
+        .error {
+            color: red;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+        }
     </style>
     <script>
         // 从URL获取参数
         function getUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return {
-                deviceId: urlParams.get('id') || 'unknown',
-                version: urlParams.get('v') || 'unknown',
-                timestamp: urlParams.get('t') || '未提供时间'
-            };
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                return {
+                    deviceId: urlParams.get('id') || 'unknown',
+                    version: urlParams.get('v') || 'unknown',
+                    timestamp: urlParams.get('t') || '未提供时间'
+                };
+            } catch (error) {
+                console.error('解析URL参数时出错:', error);
+                return {
+                    deviceId: 'unknown',
+                    version: 'unknown',
+                    timestamp: '解析错误'
+                };
+            }
         }
 
-        // 记录使用统计
-        async function recordUsage() {
+        // 记录使用统计 - 不使用async/await，改用传统的Promise处理
+        function recordUsage() {
             try {
                 const params = getUrlParams();
                 
-                // 方法2：使用CountAPI（简单的计数器API）
-                const countApiUrl = `https://api.countapi.xyz/hit/bomchecker/v${params.version.replace(/\./g, '-')}`;
-                await fetch(countApiUrl);
+                // 显示参数
+                document.getElementById('device-id').textContent = params.deviceId;
+                document.getElementById('version').textContent = params.version;
+                document.getElementById('timestamp').textContent = params.timestamp;
                 
-                // 显示成功消息
-                document.getElementById('status').textContent = '统计数据已记录';
-                document.getElementById('status').className = 'success';
+                // 尝试使用CountAPI记录统计
+                try {
+                    const countApiUrl = `https://api.countapi.xyz/hit/bomchecker/v${params.version.replace(/\./g, '-')}`;
+                    
+                    // 使用传统的fetch和Promise处理
+                    fetch(countApiUrl)
+                        .then(response => {
+                            if (response.ok) {
+                                // 不使用外部API，只显示统计信息
+                                document.getElementById('status').textContent = '已记录访问信息';
+                                document.getElementById('status').className = 'success';
+                            } else {
+                                throw new Error(`HTTP错误: ${response.status}`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('记录统计数据时出错:', error);
+                            document.getElementById('status').textContent = '记录统计数据失败，但已保存访问信息';
+                            document.getElementById('status').className = 'error';
+                        })
+                        .finally(() => {
+                            // 无论成功还是失败，3秒后自动关闭窗口
+                            setTimeout(() => {
+                                window.close();
+                            }, 3000);
+                        });
+                } catch (error) {
+                    console.error('调用统计API时出错:', error);
+                    document.getElementById('status').textContent = '记录统计数据失败，但已保存访问信息';
+                    document.getElementById('status').className = 'error';
+                    
+                    // 3秒后自动关闭窗口
+                    setTimeout(() => {
+                        window.close();
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('记录统计数据时出错:', error);
+                document.getElementById('status').textContent = '记录统计数据失败';
+                document.getElementById('status').className = 'error';
                 
                 // 3秒后自动关闭窗口
                 setTimeout(() => {
                     window.close();
                 }, 3000);
-            } catch (error) {
-                console.error('记录统计数据时出错:', error);
-                document.getElementById('status').textContent = '记录统计数据失败';
-                document.getElementById('status').style.color = 'red';
             }
         }
 
         // 页面加载完成后执行
-        window.addEventListener('DOMContentLoaded', function() {
-            const params = getUrlParams();
-            
-            // 显示参数 - 直接显示原始字符串，不进行任何转换
-            document.getElementById('device-id').textContent = params.deviceId;
-            document.getElementById('version').textContent = params.version;
-            document.getElementById('timestamp').textContent = params.timestamp;
-            
-            // 记录使用统计
-            recordUsage();
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                recordUsage();
+            } catch (error) {
+                console.error('初始化统计功能时出错:', error);
+                
+                // 显示错误信息
+                try {
+                    document.getElementById('status').textContent = '初始化统计功能时出错';
+                    document.getElementById('status').className = 'error';
+                } catch (e) {
+                    // 如果连DOM操作都失败了，至少在控制台记录错误
+                    console.error('无法更新DOM:', e);
+                }
+            }
         });
     </script>
 </head>
