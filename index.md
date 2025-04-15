@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BOM Checker Usage Tracker</title>
+    <title>BOM Checker 使用统计</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,7 +39,7 @@
             return {
                 deviceId: urlParams.get('id') || 'unknown',
                 version: urlParams.get('v') || 'unknown',
-                timestamp: urlParams.get('t') || new Date().toISOString() // 使用传入的时间戳或当前时间
+                timestamp: urlParams.get('t') || '未提供时间'
             };
         }
 
@@ -48,20 +48,9 @@
             try {
                 const params = getUrlParams();
                 
-                // 方法1：使用GitHub API创建一个Issue来存储统计数据
-                // 注意：这需要GitHub令牌，通常不适合客户端使用
-                
                 // 方法2：使用CountAPI（简单的计数器API）
                 const countApiUrl = `https://api.countapi.xyz/hit/bomchecker/v${params.version.replace(/\./g, '-')}`;
                 await fetch(countApiUrl);
-                
-                // 方法3：使用自定义API（如果有）
-                // const apiUrl = 'https://your-api-endpoint.com/track';
-                // await fetch(apiUrl, {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(params)
-                // });
                 
                 // 显示成功消息
                 document.getElementById('status').textContent = '统计数据已记录';
@@ -82,7 +71,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             const params = getUrlParams();
             
-            // 显示参数
+            // 显示参数 - 直接显示原始字符串，不进行任何转换
             document.getElementById('device-id').textContent = params.deviceId;
             document.getElementById('version').textContent = params.version;
             document.getElementById('timestamp').textContent = params.timestamp;
