@@ -1,4 +1,4 @@
 ---
-title: "YOUR-TITLE"
-date: YYYY-MM-DD
+title: "数据统计"
+date: 2025-04-15
 ---
