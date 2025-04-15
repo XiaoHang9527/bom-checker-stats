@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>BOM Checker Usage Tracker</title>
+    <title>BOM Checker 使用统计</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,7 +36,6 @@
         // 从URL获取参数
         function getUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
-            // 直接使用传入的时间字符串，不进行任何转换
             return {
                 deviceId: urlParams.get('id') || 'unknown',
                 version: urlParams.get('v') || 'unknown',
